@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	    <script>
+        function generate(axiom, rules) {
+            let result = '';
+            for (let i = 0; i < axiom.length; i++) {
+                let char = axiom[i];
+                if (rules[char]) {
+                    result += rules[char];
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+        function draw(axiom, angle, length, start, width, context) {
+            let stack = [];
+            let position = start;
+            let direction = -Math.PI / 2;
+            context.beginPath();
+            context.moveTo(position[0], position[1]);
+            for (let i = 0; i < axiom.length; i++) {
+                let char = axiom[i];
+		let x;
+		let y;
+                switch (char) {
+                    case 'F':
+                        x = position[0] + length * Math.cos(direction);
+                        y = position[1] + length * Math.sin(direction);
+                        context.lineTo(x, y);
+			context.fillStyle = 'green';
+			context.fillRect(x,y,0.5,0.5);
+                        position = [x, y];
+                        break;
+		    case 'X':
+                        x = position[0] + length * Math.sin(direction);
+                        y = position[1] + length * Math.cos(direction);
+                        context.lineTo(x, y);
+                        position = [x, y];
+                        break;
+                    case '+':
+                        direction += angle * Math.PI / 180;
+                        break;
+                    case '-':
+                        direction -= angle * Math.PI / 180;
+                        break;
+                    case '[':
+                        stack.push([position, direction]);
+                        break;
+                    case ']':
+                        let state = stack.pop();
+                        position = state[0];
+                        direction = state[1];
+                        context.moveTo(position[0], position[1]);
+                        break;
+                }
+            }
+            context.strokeStyle = Math.random()*100 > 50 ? 'green' : '#7ab43c';
+            context.lineWidth = width;
+            context.stroke();
+        }
+        function drawLSystem() {
+            const canvas = document.getElementById('myCanvas');
+            const context = canvas.getContext('2d');
+            //x nyi...need to think
+	    const rules = {
+                'F': 'FF+[+F-F-F]-[-F+F+F]'
+            };
+            var axiom = 'F';
+            const angle = 25;
+            const iterations = 5;
+            const length = 5;
+            const start = [250, 600];
+            const width = 1;
+            var ct = 0;
+            var anim = setInterval(function () {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                axiom = generate(axiom, rules);
+                draw(axiom, angle, length, start, width, context);
+		context.beginPath();
+                context.arc(250, 600, 15, 0, 2 * Math.PI);
+                context.fillStyle = '#e1d5a4';
+                context.fill();
+                context.beginPath();
+                context.moveTo(0, 600);
+                context.lineTo(600, 600);
+                context.strokeStyle = 'brown';
+                context.lineWidth = 5;
+                context.stroke();
+		ct++;
+                if (ct == iterations) {
+                    clearInterval(anim);
+                }
+            }, 300);
+        }
+    </script>
+    <body style="background-color:#fdf7e6;color:#3f6c26">
+	    <div style="display:flex;align-items:center;">
+<img src="/Users/hitzel/Downloads/mooli_logo.png" width="256" height="256">
+ 
+<b><pre style="margin:0">
+	,---.    ,---.    ,-----.        ,-----.      .---.    .-./`)         ,---.    ,---.   ____        _______   .---.  .---..-./`) ,---.   .--.    .-''-.     .-'''-.
+|    \  /    |  .'  .-,  '.    .'  .-,  '.    | ,_|    \ .-.')        |    \  /    | .'  __ `.    /   __  \  |   |  |_ _|\ .-.')|    \  |  |  .'_ _   \   / _     \
+|  ,  \/  ,  | / ,-.|  \ _ \  / ,-.|  \ _ \ ,-./  )    / `-' \        |  ,  \/  ,  |/   '  \  \  | ,_/  \__) |   |  ( ' )/ `-' \|  ,  \ |  | / ( ` )   ' (`' )/`--'
+|  |\_   /|  |;  \  '_ /  | :;  \  '_ /  | :\  '_ '`)   `-'`"`        |  |\_   /|  ||___|  /  |,-./  )       |   '-(_{;}_)`-'`"`|  |\_ \|  |. (_ o _)  |(_ o _).
+|  _( )_/ |  ||  _`,/ \ _/  ||  _`,/ \ _/  | > (_)  )   .---.         |  _( )_/ |  |   _.-`   |\  '_ '`)     |      (_,_) .---. |  _( )_\  ||  (_,_)___| (_,_). '.
+| (_ o _) |  |: (  '\_/ \   ;: (  '\_/ \   ;(  .  .-'   |   |         | (_ o _) |  |.'   _    | > (_)  )  __ | _ _--.   | |   | | (_ o _)  |'  \   .---..---.  \  :
+|  (_,_)  |  | \ `"/  \  ) /  \ `"/  \  ) /  `-'`-'|___ |   |         |  (_,_)  |  ||  _( )_  |(  .  .-'_/  )|( ' ) |   | |   | |  (_,_)\  | \  `-'    /\    `-'  |
+|  |      |  |  '. \_/``".'    '. \_/``".'    |        \|   |         |  |      |  |\ (_ o _) / `-'`-'     / (_{;}_)|   | |   | |  |    |  |  \       /  \       /
+'--'      '--'    '-----'        '-----'      `--------`'---'         '--'      '--' '.(_,_).'    `._____.'  '(_,_) '---' '---' '--'    '--'   `'-..-'    `-...-'
+	</pre></b>	</div>
+	<div style="position:absolute; z-index:1">
+		<hr width="1000%">
+		<hr width="1000%">
+		<p>Welcome!</p>
+		<p>We're <span onclick="drawLSystem();" style="cursor:pointer;font-size:17px"><b style="-webkit-text-stroke:0.5px #7ab43c;">growing</b></span> something good!</p>
+		</div>
+<canvas id="myCanvas" style="z-index:-1" height="600px" width="512px">
+            Your browser does not support the HTML5 canvas tag.
+        </canvas>
+	
+	</body>
+</html>
